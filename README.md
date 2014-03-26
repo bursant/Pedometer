@@ -6,6 +6,15 @@ Android Pedometer Pedorepo.
 IDE Configuration
 =================
 
+Known problems
+-------------
+
+ * Maven does not select `./pedometer-droid/src/` as source catalog.
+ * Maven does not set properly *Language level*. Check if set is `6.0`.
+
+Howto
+-----
+
  * Grab this project using `git clone`
  * Go into the `./Pedometer/` catalog
  * Run commands: `mvn install` and `mvn idea:idea` (or `mvn eclipse:eclipse`)
