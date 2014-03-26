@@ -1,8 +1,8 @@
 package pedometer.common.connector.server;
 
-import pedometer.common.connector.client.ConnectorClient;
+import pedometer.common.connector.client.ClientConnector;
 
 public interface ServerListener {
 
-    void notifyNewClient(ConnectorClient client);
+    void notifyNewClient(ClientConnector client);
 }

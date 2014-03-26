@@ -1,20 +1,20 @@
 package pedometer.common.connector.server;
 
-import pedometer.common.connector.client.ConnectorClient;
+import pedometer.common.connector.client.ClientConnector;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-public class ConnectorServer extends Thread {
+public class ServerConnector extends Thread {
 
-    private static final Logger logger = Logger.getLogger(String.valueOf(ConnectorServer.class));
+    private static final Logger logger = Logger.getLogger(String.valueOf(ServerConnector.class));
 
     private final ServerSocket serverSocket;
 
     private ServerListener listener;
 
-    public ConnectorServer(ServerSocket serverSocket) {
+    public ServerConnector(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
     }
 
@@ -28,7 +28,7 @@ public class ConnectorServer extends Thread {
             while (serverSocket.isBound() && !serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 try {
-                    ConnectorClient client = new ConnectorClient(socket);
+                    ClientConnector client = new ClientConnector(socket);
                     if (listener != null) {
                         listener.notifyNewClient(client);
                     } else {

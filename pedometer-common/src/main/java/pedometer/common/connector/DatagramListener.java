@@ -1,6 +1,6 @@
 package pedometer.common.connector;
 
-public interface Listener {
+public interface DatagramListener {
 
     void notifyReceived(byte[] object);
 

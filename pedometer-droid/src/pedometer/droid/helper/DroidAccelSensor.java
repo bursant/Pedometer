@@ -3,6 +3,8 @@ package pedometer.droid.helper;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import pedometer.droid.DroidHandler;
+import pedometer.droid.DroidMain;
 import pedometer.droid.DroidPreference;
 
 public class DroidAccelSensor implements SensorEventListener {
@@ -11,16 +13,21 @@ public class DroidAccelSensor implements SensorEventListener {
 
     private final SpeedAccelCalculator speedAccelCalculator = new SpeedAccelCalculator();
 
+    private final DroidMain droidMain;
+
     private float[] oldValues;
 
-    public DroidAccelSensor(boolean swapSensorOrientation) {
+    public DroidAccelSensor(boolean swapSensorOrientation, DroidMain droidMain) {
         this.swapSensorOrientation = swapSensorOrientation;
+        this.droidMain = droidMain;
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         float[] values = lowPass(sensorEvent.values, oldValues);
         oldValues = values;
+        droidMain.setAccSensor(values);
+        DroidHandler.getNetwork().sendAcc(values);
     }
 
     @Override

@@ -12,7 +12,7 @@ public class TestServer {
         DatagramSocket socket = new DatagramSocket(port);
 
         // socket.bind(new InetSocketAddress(address, port));
-        Connector server = new Connector(socket, address, port);
+        DatagramConnector server = new DatagramConnector(socket, address, port);
 
         server.setListener(new MainServerListener(server));
         server.start();

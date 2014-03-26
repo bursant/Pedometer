@@ -8,13 +8,23 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>pedometer.droid</groupId>
-    <artifactId>pedometer-droid</artifactId>
+    <groupId>pedometer.server</groupId>
+    <artifactId>pedometer-server</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
 
     <build>
-        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <source>${java.source}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencies>
@@ -22,16 +32,6 @@
             <groupId>pedometer.common</groupId>
             <artifactId>pedometer-common</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.roboguice</groupId>
-            <artifactId>roboguice</artifactId>
-            <version>2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>1.3.9</version>
         </dependency>
     </dependencies>
 

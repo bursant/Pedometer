@@ -20,7 +20,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <source>${java.version}</source>
+                    <source>${java.source}</source>
                     <target>${java.version}</target>
                 </configuration>
             </plugin>

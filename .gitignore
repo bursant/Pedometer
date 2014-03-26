@@ -1,4 +1,4 @@
-[200~*.out
+~*.out
 build
 dist
 nbproject
@@ -38,3 +38,5 @@ tmp/
 *~.nib
 
 *~
+
+pedometer-droid/local.properties

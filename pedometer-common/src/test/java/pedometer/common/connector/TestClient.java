@@ -13,7 +13,7 @@ public class TestClient {
         DatagramSocket socket = new DatagramSocket();
 
         socket.connect(new InetSocketAddress(address, port));
-        Connector client = new Connector(socket, address, port);
+        DatagramConnector client = new DatagramConnector(socket, address, port);
 
         client.setListener(new MainClientListener());
         client.start();

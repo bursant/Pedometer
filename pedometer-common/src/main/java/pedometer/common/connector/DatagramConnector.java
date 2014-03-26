@@ -6,9 +6,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.logging.Logger;
 
-public class Connector extends Thread {
+public class DatagramConnector extends Thread {
 
-    private static final Logger logger = Logger.getLogger(String.valueOf(Connector.class));
+    private static final Logger logger = Logger.getLogger(String.valueOf(DatagramConnector.class));
 
     private final static int RECEIVING_BUFFER_SIZE = 4096;
 
@@ -18,15 +18,15 @@ public class Connector extends Thread {
 
     private final int port;
 
-    private Listener listener;
+    private DatagramListener listener;
 
-    public Connector(DatagramSocket socket, InetAddress address, int port) throws IOException {
+    public DatagramConnector(DatagramSocket socket, InetAddress address, int port) throws IOException {
         this.socket = socket;
         this.address = address;
         this.port = port;
     }
 
-    public void setListener(Listener listener) {
+    public void setListener(DatagramListener listener) {
         this.listener = listener;
     }
 

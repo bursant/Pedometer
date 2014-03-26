@@ -4,4 +4,11 @@ option java_outer_classname = "CommonProto";
 option optimize_for = SPEED;
 
 message Message {
+    optional float accX = 1;
+    optional float accY = 2;
+    optional float accZ = 3;
+
+    optional float gyroX = 4;
+    optional float gyroY = 5;
+    optional float gyroZ = 6;
 }

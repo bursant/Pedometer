@@ -7,11 +7,15 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.*;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import pedometer.app.R;
-import pedometer.common.connector.Listener;
+import pedometer.common.connector.client.ClientListener;
 import pedometer.droid.helper.DroidAccelSensor;
 import pedometer.droid.helper.DroidGyroSensor;
 import pedometer.droid.helper.DroidNetwork;
@@ -35,14 +39,11 @@ public class DroidMain extends RoboActivity {
     @InjectView(R.id.connectButton)
     private Button connectButton;
 
-    @InjectView(R.id.driveButton)
-    private Button driveButton;
+    @InjectView(R.id.accSensor)
+    private TextView accSensorTextView;
 
-    @InjectView(R.id.leftSide)
-    private View leftSide;
-
-    @InjectView(R.id.rightSide)
-    private View rightSide;
+    @InjectView(R.id.gyroSensor)
+    private TextView gyroSensorTextView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,10 +51,8 @@ public class DroidMain extends RoboActivity {
 
         DroidHandler.setMain(this);
         setContentView(R.layout.main);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         connectButton.setText(network.isConnected() ? "Disconnect" : "Connect");
-        driveButton.setEnabled(network.isConnected());
 
         connectButton.setOnClickListener(new View.OnClickListener() {
 
@@ -65,7 +64,7 @@ public class DroidMain extends RoboActivity {
                     String port = PreferenceManager.getDefaultSharedPreferences(DroidMain.this)
                             .getString(DroidPreference.PORT, DroidPreference.PORT_VAL);
 
-                    new ConnectAsyncTask(DroidMain.this).execute(hostname, port, new Listener() {
+                    new ConnectAsyncTask(DroidMain.this).execute(hostname, port, new ClientListener() {
                         @Override
                         public void notifyReceived(byte[] object) {
                         }
@@ -80,56 +79,14 @@ public class DroidMain extends RoboActivity {
                 }
             }
         });
-        driveButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                // nothing
-            }
-        });
-
-        leftSide.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        // touch move code
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        break;
-                }
-                return false;
-            }
-        });
-        rightSide.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        // touch move code
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        break;
-                }
-                return false;
-            }
-        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        sensorAccel = new DroidAccelSensor(DroidPreference.swapSensorOrientation());
-        sensorGyro = new DroidGyroSensor(DroidPreference.swapSensorOrientation());
+        sensorAccel = new DroidAccelSensor(DroidPreference.swapSensorOrientation(), this);
+        sensorGyro = new DroidGyroSensor(DroidPreference.swapSensorOrientation(), this);
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -194,9 +151,6 @@ public class DroidMain extends RoboActivity {
             @Override
             public void run() {
                 connectButton.setText("Disconnect");
-                driveButton.setEnabled(true);
-                driveButton.setText("Drive");
-
                 Toast.makeText(DroidMain.this, "Connected to " + hostname + "/" + port, Toast.LENGTH_LONG).show();
             }
         });
@@ -216,9 +170,6 @@ public class DroidMain extends RoboActivity {
             @Override
             public void run() {
                 connectButton.setText("Connect");
-                driveButton.setEnabled(false);
-                driveButton.setText("Drive");
-
                 Toast.makeText(DroidMain.this, "Disconnected", Toast.LENGTH_LONG).show();
             }
         });
@@ -229,6 +180,23 @@ public class DroidMain extends RoboActivity {
             @Override
             public void run() {
                 Toast.makeText(DroidMain.this, "Error during disconnecting", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void setAccSensor(final float values[]) {
+        setSensor(accSensorTextView, "acc", values);
+    }
+
+    public void setGyroSensor(float values[]) {
+        setSensor(gyroSensorTextView, "gyro", values);
+    }
+
+    private void setSensor(final TextView view, final String pre, final float values[]) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                view.setText(pre + ": x: " + values[0] + "; y: " + values[1] + "; z: " + values[2]);
             }
         });
     }

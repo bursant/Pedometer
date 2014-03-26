@@ -5,18 +5,11 @@ import java.util.Arrays;
 /**
  * Created by paoolo on 26.03.14.
  */
-class MainServerListener implements Listener {
-
-    private final Connector server;
-
-    public MainServerListener(Connector server) {
-        this.server = server;
-    }
+class MainClientListener implements DatagramListener {
 
     @Override
     public void notifyReceived(byte[] object) {
         System.err.println("received " + Arrays.toString(object));
-        server.send(object);
     }
 
     @Override

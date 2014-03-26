@@ -4,9 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-public class ConnectorClient extends Thread {
+public class ClientConnector extends Thread {
 
-    private static final Logger logger = Logger.getLogger(String.valueOf(ConnectorClient.class));
+    private static final Logger logger = Logger.getLogger(String.valueOf(ClientConnector.class));
 
     private final Socket socket;
 
@@ -16,7 +16,7 @@ public class ConnectorClient extends Thread {
 
     private ClientListener listener;
 
-    public ConnectorClient(Socket socket) throws IOException {
+    public ClientConnector(Socket socket) throws IOException {
         this.socket = socket;
 
         InputStream inputStream = socket.getInputStream();
