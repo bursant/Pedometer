@@ -10,7 +10,7 @@ import android.preference.PreferenceManager;
 import android.view.*;
 import android.widget.Button;
 import android.widget.Toast;
-import info.suder.navi.main.app.R;
+import pedometer.app.R;
 import pedometer.common.connector.Listener;
 import pedometer.droid.helper.DroidAccelSensor;
 import pedometer.droid.helper.DroidGyroSensor;
