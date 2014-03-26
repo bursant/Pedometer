@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res/info.suder.navi.main.app">
+
+    <PreferenceCategory
+            android:title="Network settings">
+        <EditTextPreference
+                android:key="host"
+                android:title="Host"
+                android:summary="Hostname or address IP of robot"
+                android:defaultValue="192.168.2.200"/>
+        <EditTextPreference
+                android:key="port"
+                android:title="Port"
+                android:summary="Port of robot"
+                android:defaultValue="1234"
+                android:inputType="number"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="Driver calibration">
+        <CheckBoxPreference
+                android:key="swapSensorOrientation"
+                android:title="Sensor orientation"
+                android:summary="Swap sensor orientation"/>
+        <pedometer.droid.preference.SensorPreference
+                android:key="maxGlobalX"
+                android:title="Forward"
+                android:summary="Maximum forward position"
+                custom:sensorValue="x"/>
+        <pedometer.droid.preference.SensorPreference
+                android:key="minGlobalX"
+                android:title="Backward"
+                android:summary="Maximum backward position"
+                custom:sensorValue="x"/>
+        <pedometer.droid.preference.SensorPreference
+                android:key="maxGlobalY"
+                android:title="Right"
+                android:summary="Maximum right position"
+                custom:sensorValue="y"/>
+        <pedometer.droid.preference.SensorPreference
+                android:key="minGlobalY"
+                android:title="Left"
+                android:summary="Maximum left position"
+                custom:sensorValue="y"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="Speed calibration">
+        <EditTextPreference
+                android:key="maxSpeed"
+                android:title="Maximum speed"
+                android:summary="Maximum speed of robo"
+                android:defaultValue="1200"
+                android:inputType="number"/>
+        <EditTextPreference
+                android:key="maxTurningSpeed"
+                android:title="Maximum turning speed"
+                android:summary="Maximum turning speed of robo"
+                android:defaultValue="500"
+                android:inputType="number"/>
+        <EditTextPreference
+                android:key="alpha"
+                android:title="Alpha"
+                android:summary="Alpha low pass"
+                android:defaultValue="0.3"
+                android:inputType="numberDecimal"/>
+    </PreferenceCategory>
+</PreferenceScreen>

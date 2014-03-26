@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="info.suder.navi.main.app"
+          android:versionCode="1"
+          android:versionName="1.0">
+
+    <uses-sdk
+            android:minSdkVersion="10"
+            android:targetSdkVersion="16"/>
+
+    <uses-permission
+            android:name="android.permission.INTERNET"/>
+
+    <application
+            android:label="@string/app_name"
+            android:allowBackup="true"
+            android:icon="@drawable/ic_launcher">
+        <activity
+                android:name="pedometer.droid.DroidMain"
+                android:label="@string/app_name"
+                android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+                android:name="pedometer.droid.DroidPreference"
+                android:screenOrientation="landscape"/>
+
+    </application>
+</manifest> 

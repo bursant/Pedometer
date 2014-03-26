@@ -1,0 +1,7 @@
+option java_package = "pedometer.common.proto";
+option java_outer_classname = "CommonProto";
+
+option optimize_for = SPEED;
+
+message Message {
+}

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+    <LinearLayout
+            android:id="@+id/leftSide"
+            android:orientation="vertical"
+            android:layout_width="100dp"
+            android:layout_height="fill_parent">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hold to drive"
+                android:id="@+id/leftText"
+                android:layout_gravity="center"/>
+    </LinearLayout>
+
+    <RelativeLayout
+            android:id="@+id/center"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_toRightOf="@id/leftSide"
+            android:layout_toLeftOf="@+id/rightSide">
+
+        <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonsLayout"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="10dp">
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Connect"
+                    android:id="@+id/connectButton"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"/>
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Drive"
+                    android:layout_below="@id/connectButton"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/driveButton"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+            android:id="@+id/rightSide"
+            android:orientation="vertical"
+            android:layout_width="100dp"
+            android:layout_height="fill_parent"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hold to drive"
+                android:id="@+id/rightText"
+                android:layout_gravity="center"/>
+    </LinearLayout>
+
+</RelativeLayout>
