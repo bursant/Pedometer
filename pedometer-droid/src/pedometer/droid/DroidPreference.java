@@ -3,7 +3,7 @@ package pedometer.droid;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import info.suder.navi.main.app.R;
+import pedometer.app.R;
 
 public class DroidPreference extends PreferenceActivity {
 

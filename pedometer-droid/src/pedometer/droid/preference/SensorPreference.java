@@ -13,7 +13,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 import pedometer.droid.DroidPreference;
-import info.suder.navi.main.app.R;
+import pedometer.app.R;
 
 public class SensorPreference extends DialogPreference implements SensorEventListener {
 
