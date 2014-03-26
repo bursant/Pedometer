@@ -53,6 +53,6 @@ public class DroidNetwork {
     }
 
     private static byte[] getMessage() {
-        return CommonProto.ControlMessage.newBuilder().build().toByteArray();
+        return CommonProto.Message.newBuilder().build().toByteArray();
     }
 }
