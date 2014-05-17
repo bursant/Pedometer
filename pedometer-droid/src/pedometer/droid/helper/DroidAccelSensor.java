@@ -26,6 +26,9 @@ public class DroidAccelSensor implements SensorEventListener {
     public void onSensorChanged(SensorEvent sensorEvent) {
         float[] values = lowPass(sensorEvent.values, oldValues);
         oldValues = values;
+
+        // TODO(bursant): fill with SpeedGyroCalculator
+
         droidMain.setAccSensor(values);
         DroidHandler.getNetwork().sendAcc(values);
     }

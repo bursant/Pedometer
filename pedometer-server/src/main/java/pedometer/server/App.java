@@ -17,8 +17,10 @@ class MainClientListener implements ClientListener {
     public void notifyReceived(byte[] object) {
         try {
             CommonProto.Message msg = CommonProto.Message.parseFrom(object);
-            System.err.println("acc: x: " + msg.getAccX() + "; y: " + msg.getAccY() + "; z: " + msg.getAccZ() + "\n" +
-                    "gyro: x: " + msg.getGyroX() + "; y: " + msg.getGyroY() + "; z: " + msg.getGyroZ());
+            String out = String.format("acc: x=%04g, y=%04g, z=%04g; gyro: x=%04g, y=%04g, z=%04g",
+                    msg.getAccX(), msg.getAccY(), msg.getAccZ(),
+                    msg.getGyroX(), msg.getGyroY(), msg.getGyroZ());
+            System.err.println(out);
         } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
         }

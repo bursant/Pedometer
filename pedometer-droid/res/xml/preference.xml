@@ -47,25 +47,4 @@
                 custom:sensorValue="y"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-            android:title="Speed calibration">
-        <EditTextPreference
-                android:key="maxSpeed"
-                android:title="Maximum speed"
-                android:summary="Maximum speed of robo"
-                android:defaultValue="1200"
-                android:inputType="number"/>
-        <EditTextPreference
-                android:key="maxTurningSpeed"
-                android:title="Maximum turning speed"
-                android:summary="Maximum turning speed of robo"
-                android:defaultValue="500"
-                android:inputType="number"/>
-        <EditTextPreference
-                android:key="alpha"
-                android:title="Alpha"
-                android:summary="Alpha low pass"
-                android:defaultValue="0.3"
-                android:inputType="numberDecimal"/>
-    </PreferenceCategory>
 </PreferenceScreen>

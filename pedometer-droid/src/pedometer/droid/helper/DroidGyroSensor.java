@@ -26,6 +26,9 @@ public class DroidGyroSensor implements SensorEventListener {
     public void onSensorChanged(SensorEvent sensorEvent) {
         float[] values = lowPass(sensorEvent.values, oldValues);
         oldValues = values;
+
+        // TODO(bursant): fill with SpeedGyroCalculator
+
         droidMain.setGyroSensor(values);
         DroidHandler.getNetwork().sendGyro(values);
     }

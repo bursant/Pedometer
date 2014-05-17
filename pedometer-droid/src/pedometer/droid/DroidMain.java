@@ -196,7 +196,7 @@ public class DroidMain extends RoboActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                view.setText(pre + ": x: " + values[0] + "; y: " + values[1] + "; z: " + values[2]);
+                view.setText(pre + ":\n\tx: " + values[0] + ";\n\ty: " + values[1] + ";\n\tz: " + values[2]);
             }
         });
     }
