@@ -17,29 +17,30 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
     private List<IDetector> detectors;
     private Map<IDetector, Boolean> results;
 
-    public DetectorManager(List<IDetector> detectors){
+    public DetectorManager(List<IDetector> detectors) {
         this.detectors = detectors;
 
         results = new TreeMap<IDetector, Boolean>();
-        for(IDetector detector : detectors) {
+        for (IDetector detector : detectors) {
             results.put(detector, false);
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        for(IDetector detector : detectors) {
+        for (IDetector detector : detectors) {
             boolean result = detector.detect(event);
             results.put(detector, result);
         }
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) { }
+    public void onAccuracyChanged(Sensor sensor, int i) {
+    }
 
     @Override
     public boolean register(IDetector detector) {
-        return detectors.add(detector );
+        return detectors.add(detector);
     }
 
     @Override

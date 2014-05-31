@@ -10,7 +10,8 @@
             android:id="@+id/buttonsLayout"
             android:layout_alignParentTop="true"
             android:layout_marginTop="10dp" android:layout_marginBottom="10dp"
-            android:layout_alignParentLeft="true" android:layout_alignParentRight="true" tools:ignore="UselessParent">
+            android:layout_alignParentLeft="true" android:layout_alignParentRight="true"
+            tools:ignore="UselessParent">
         <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

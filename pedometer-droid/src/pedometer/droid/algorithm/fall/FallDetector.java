@@ -19,7 +19,7 @@ public class FallDetector implements IDetector {
 
     private Queue<Double> buffer;
 
-    public FallDetector(){
+    public FallDetector() {
         buffer = new LinkedList<Double>();
         initBuffer(bufferSize);
     }
@@ -29,8 +29,8 @@ public class FallDetector implements IDetector {
     public boolean detect(SensorEvent event) {
         double vector = Math.sqrt(
                 (event.values[0] * event.values[0]) +
-                (event.values[1] * event.values[1]) +
-                (event.values[2] * event.values[2])
+                        (event.values[1] * event.values[1]) +
+                        (event.values[2] * event.values[2])
         );
 
         buffer.remove();
@@ -38,12 +38,12 @@ public class FallDetector implements IDetector {
 
         int counter = 0;
 
-        for(Double value : buffer){
-            if(value < freeFallMaxThreshold && value > freeFallMinThreshold)
+        for (Double value : buffer) {
+            if (value < freeFallMaxThreshold && value > freeFallMinThreshold)
                 counter++;
-            if(value < freeFallMinThreshold)
+            if (value < freeFallMinThreshold)
                 counter = 0;
-            if(value > hitMinThreshold && counter >= 3) {
+            if (value > hitMinThreshold && counter >= 3) {
                 initBuffer(bufferSize);
                 return true;
             }
@@ -52,9 +52,9 @@ public class FallDetector implements IDetector {
         return false;
     }
 
-    private void initBuffer(int bufferLength){
+    private void initBuffer(int bufferLength) {
         buffer.clear();
-        for(int i = 0; i < bufferLength; i++)
+        for (int i = 0; i < bufferLength; i++)
             buffer.add(0.0);
     }
 

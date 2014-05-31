@@ -14,7 +14,7 @@ public class StepDetector implements IDetector {
     private long StepDetectionDelta;
     private double DifferenceDelta;
 
-    public StepDetector(ExponentialMovingAverage avg){
+    public StepDetector(ExponentialMovingAverage avg) {
         this.avg = avg;
         LastStepDetection = 0;
         StepDetectionDelta = 500;
@@ -22,7 +22,7 @@ public class StepDetector implements IDetector {
     }
 
     @Override
-    public boolean detect(SensorEvent event){
+    public boolean detect(SensorEvent event) {
         double vector = Math.sqrt(
                 (event.values[0] * event.values[0]) +
                         (event.values[1] * event.values[1]) +
@@ -32,7 +32,7 @@ public class StepDetector implements IDetector {
         double average = avg.average(vector);
         long time = System.currentTimeMillis();
 
-        if(vector - average > DifferenceDelta && time-LastStepDetection > StepDetectionDelta){
+        if (vector - average > DifferenceDelta && time - LastStepDetection > StepDetectionDelta) {
             LastStepDetection = time;
             //TODO You may notify something here that step was detected.
             return true;
