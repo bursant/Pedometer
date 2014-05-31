@@ -16,6 +16,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import pedometer.app.R;
 import pedometer.common.connector.client.ClientListener;
+import pedometer.droid.algorithm.common.DetectorManager;
+import pedometer.droid.algorithm.common.IDetector;
+import pedometer.droid.algorithm.common.IDetectorListener;
+import pedometer.droid.algorithm.fall.FallDetector;
+import pedometer.droid.algorithm.step.ExponentialMovingAverage;
+import pedometer.droid.algorithm.step.StepDetector;
 import pedometer.droid.helper.DroidAccelSensor;
 import pedometer.droid.helper.DroidGyroSensor;
 import pedometer.droid.helper.DroidNetwork;
@@ -26,11 +32,17 @@ import roboguice.inject.InjectView;
 
 import java.io.IOException;
 
-public class DroidMain extends RoboActivity {
+public class DroidMain extends RoboActivity implements IDetectorListener {
 
     public static final int PLEASE_WAIT_DIALOG = 1;
 
     private final DroidNetwork network = DroidHandler.getNetwork();
+
+    private ExponentialMovingAverage avg;
+
+    private FallDetector fallDetector;
+
+    private StepDetector stepDetector;
 
     private DroidAccelSensor sensorAccel;
 
@@ -85,13 +97,26 @@ public class DroidMain extends RoboActivity {
     protected void onResume() {
         super.onResume();
 
+        avg = new ExponentialMovingAverage(DroidPreference.getAlpha());
+
+        fallDetector = new FallDetector();
+        stepDetector = new StepDetector(avg);
+
         sensorAccel = new DroidAccelSensor(DroidPreference.swapSensorOrientation(), this);
         sensorGyro = new DroidGyroSensor(DroidPreference.swapSensorOrientation(), this);
+
+        DetectorManager detectorManager = DroidHandler.getDetectorManager();
+
+        detectorManager.registerDetector(fallDetector);
+        detectorManager.registerDetector(stepDetector);
+
+        detectorManager.registerListener(this);
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(sensorAccel, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(detectorManager, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         Sensor gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         sensorManager.registerListener(sensorGyro, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -120,9 +145,17 @@ public class DroidMain extends RoboActivity {
     protected void onPause() {
         super.onPause();
 
+        DetectorManager detectorManager = DroidHandler.getDetectorManager();
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
         sensorManager.unregisterListener(sensorAccel);
         sensorManager.unregisterListener(sensorGyro);
+        sensorManager.unregisterListener(detectorManager);
+
+        detectorManager.unregisterDetector(fallDetector);
+        detectorManager.unregisterDetector(stepDetector);
+
+        detectorManager.unregisterListener(this);
 
         try {
             network.disconnect();
@@ -197,6 +230,22 @@ public class DroidMain extends RoboActivity {
             @Override
             public void run() {
                 view.setText(pre + ":\n\tx: " + values[0] + ";\n\ty: " + values[1] + ";\n\tz: " + values[2]);
+            }
+        });
+    }
+
+    @Override
+    public void notifyCountChange(final IDetector detector, final Integer count) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (detector != null) {
+                    if (detector.equals(fallDetector)) {
+                        Toast.makeText(DroidMain.this, "Fall detected, current count: " + count, Toast.LENGTH_LONG).show();
+                    } else if (detector.equals(stepDetector)) {
+                        Toast.makeText(DroidMain.this, "Step detected, current count: " + count, Toast.LENGTH_LONG).show();
+                    }
+                }
             }
         });
     }

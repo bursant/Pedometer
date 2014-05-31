@@ -6,20 +6,25 @@ package pedometer.droid.algorithm.common;
  */
 public interface IDetectorManager {
 
-    /*
-     *  Registers detector from detector manager.
+    /**
+     * Register detector from detector manager.
      */
-    boolean register(IDetector detector);
+    boolean registerDetector(IDetector detector);
 
-    /*
-     * Unregisters detector from detector manager.
+    /**
+     * Unregister detector from detector manager.
      */
-    boolean unregister(IDetector detector);
+    boolean unregisterDetector(IDetector detector);
 
-    /*
-     * Returns the result of the last detector algorithm run. If true, than event was detected.
+    /**
+     * Return the result of the last detector algorithm run. If true, than event was detected.
      * If false, event was not detected.
      */
-    boolean getLastResult(IDetector detector);
+    boolean getLastResultForDetector(IDetector detector);
 
+    boolean registerListener(IDetectorListener listener);
+
+    boolean unregisterListener(IDetectorListener listener);
+
+    int getCountForDetector(IDetector detector);
 }

@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,14 +16,20 @@ import java.util.TreeMap;
 public class DetectorManager implements SensorEventListener, IDetectorManager {
 
     private List<IDetector> detectors;
+    private List<IDetectorListener> listeners;
     private Map<IDetector, Boolean> results;
+    private Map<IDetector, Integer> counts;
 
-    public DetectorManager(List<IDetector> detectors) {
+    public DetectorManager(List<IDetector> detectors, List<IDetectorListener> listeners) {
         this.detectors = detectors;
+        this.listeners = listeners;
 
         results = new TreeMap<IDetector, Boolean>();
+        counts = new HashMap<IDetector, Integer>();
+
         for (IDetector detector : detectors) {
             results.put(detector, false);
+            counts.put(detector, 0);
         }
     }
 
@@ -31,6 +38,19 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
         for (IDetector detector : detectors) {
             boolean result = detector.detect(event);
             results.put(detector, result);
+            if (result) {
+                Integer value;
+                synchronized (detector) {
+                    value = counts.get(detector);
+                    if (value != null)
+                        value += 1;
+                    counts.put(detector, value);
+                }
+                for (IDetectorListener listener : listeners) {
+                    listener.notifyCountChange(detector, value);
+                }
+            }
+
         }
     }
 
@@ -39,17 +59,38 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
     }
 
     @Override
-    public boolean register(IDetector detector) {
+    public boolean registerDetector(IDetector detector) {
+        results.put(detector, false);
+        counts.put(detector, 0);
+
         return detectors.add(detector);
     }
 
     @Override
-    public boolean unregister(IDetector detector) {
+    public boolean unregisterDetector(IDetector detector) {
+        results.remove(detector);
+        counts.remove(detector);
+
         return detectors.remove(detector);
     }
 
     @Override
-    public boolean getLastResult(IDetector detector) {
+    public boolean registerListener(IDetectorListener listener) {
+        return listeners.add(listener);
+    }
+
+    @Override
+    public boolean unregisterListener(IDetectorListener listener) {
+        return listeners.remove(listener);
+    }
+
+    @Override
+    public boolean getLastResultForDetector(IDetector detector) {
         return results.get(detector);
+    }
+
+    @Override
+    public int getCountForDetector(IDetector detector) {
+        return counts.get(detector);
     }
 }

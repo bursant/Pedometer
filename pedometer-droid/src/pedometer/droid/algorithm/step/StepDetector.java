@@ -34,11 +34,17 @@ public class StepDetector implements IDetector {
 
         if (vector - average > DifferenceDelta && time - LastStepDetection > StepDetectionDelta) {
             LastStepDetection = time;
-            //TODO You may notify something here that step was detected.
+            //TODO(bursant): You may notify something here that step was detected.
             return true;
         }
 
         return false;
     }
 
+    @Override
+    public int compareTo(IDetector iDetector) {
+        if (iDetector != null && StepDetector.class.equals(iDetector.getClass()))
+            return 0;
+        return -1;
+    }
 }

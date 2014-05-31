@@ -58,4 +58,10 @@ public class FallDetector implements IDetector {
             buffer.add(0.0);
     }
 
+    @Override
+    public int compareTo(IDetector iDetector) {
+        if (iDetector != null && FallDetector.class.equals(iDetector.getClass()))
+            return 0;
+        return -1;
+    }
 }
