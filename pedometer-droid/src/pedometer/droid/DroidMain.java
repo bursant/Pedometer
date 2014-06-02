@@ -114,9 +114,9 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-        Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         sensorManager.registerListener(sensorAccel, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(detectorManager, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(detectorManager, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         Sensor gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         sensorManager.registerListener(sensorGyro, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
