@@ -6,4 +6,5 @@
     <string name="connect">Connect</string>
     <string name="zero_falls">Zero falls.</string>
     <string name="zero_steps">Zero steps.</string>
+    <string name="start">Start</string>
 </resources>

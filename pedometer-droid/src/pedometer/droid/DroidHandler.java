@@ -3,15 +3,18 @@ package pedometer.droid;
 import pedometer.droid.algorithm.common.DetectorManager;
 import pedometer.droid.algorithm.common.IDetector;
 import pedometer.droid.algorithm.common.IDetectorListener;
+import pedometer.droid.algorithm.fall.FallDetector;
+import pedometer.droid.algorithm.step.ExponentialMovingAverage;
+import pedometer.droid.algorithm.step.StepDetector;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class DroidHandler {
 
-    private static final DroidNetwork network = new DroidNetwork();
+    public static final DroidNetwork network = new DroidNetwork();
 
-    private static final DetectorManager detectorManager;
+    static final DetectorManager detectorManager;
 
     static {
         List<IDetector> detectors = new LinkedList<IDetector>();
@@ -20,27 +23,15 @@ public class DroidHandler {
         detectorManager = new DetectorManager(detectors, listeners);
     }
 
-    private static final Object mainLock = new Object();
+    static DroidMain main;
 
-    private static DroidMain main;
+    static ExponentialMovingAverage avg;
 
-    public static void setMain(DroidMain main) {
-        synchronized (mainLock) {
-            DroidHandler.main = main;
-        }
-    }
+    static FallDetector fallDetector;
 
-    public static DroidMain getMain() {
-        synchronized (mainLock) {
-            return main;
-        }
-    }
+    static StepDetector stepDetector;
 
-    public static DroidNetwork getNetwork() {
-        return network;
-    }
+    static long startTimeStamp;
 
-    public static DetectorManager getDetectorManager() {
-        return detectorManager;
-    }
+    static boolean started;
 }

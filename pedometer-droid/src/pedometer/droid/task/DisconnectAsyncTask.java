@@ -14,7 +14,7 @@ public class DisconnectAsyncTask extends NaviAsyncTask<Void> {
     @Override
     protected Void doInBackground(Void... voids) {
         try {
-            DroidHandler.getNetwork().disconnect();
+            DroidHandler.network.disconnect();
             getMain().disconnected();
         } catch (IOException e) {
             getMain().notDisconnected();

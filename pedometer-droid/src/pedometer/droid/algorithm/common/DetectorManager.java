@@ -68,10 +68,12 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
 
     @Override
     public boolean unregisterDetector(IDetector detector) {
-        results.remove(detector);
-        counts.remove(detector);
+        if (results.containsKey(detector))
+            results.remove(detector);
+        if (counts.containsKey(detector))
+            counts.remove(detector);
 
-        return detectors.remove(detector);
+        return detectors.contains(detector) && detectors.remove(detector);
     }
 
     @Override

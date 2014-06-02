@@ -21,16 +21,26 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/zero_steps"
                 android:id="@+id/stepDetector"
-                android:layout_marginLeft="25dp"
-                android:layout_alignParentTop="true" android:layout_alignParentLeft="true"/>
+                android:layout_marginLeft="15dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/zero_falls"
                 android:id="@+id/fallDetector"
-                android:layout_marginRight="25dp" android:layout_alignTop="@+id/stepDetector"
+                android:layout_marginRight="15dp"
+                android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_centerHorizontal="true"
+                android:text="@string/start"
+                android:id="@+id/start"
+                android:layout_margin="5dp"/>
     </RelativeLayout>
 
     <LinearLayout

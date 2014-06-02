@@ -15,20 +15,29 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/zero_steps"
                 android:id="@+id/stepDetector"
-                android:layout_margin="10dp"/>
+                android:layout_marginLeft="15dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/zero_falls"
                 android:id="@+id/fallDetector"
-                android:layout_margin="10dp"
-                android:layout_below="@id/stepDetector"/>
+                android:layout_marginRight="15dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/start"
+                android:id="@+id/start"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"/>
     </RelativeLayout>
 
     <LinearLayout

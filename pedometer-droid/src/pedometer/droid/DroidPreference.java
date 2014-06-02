@@ -39,31 +39,31 @@ public class DroidPreference extends PreferenceActivity {
 
     public static float getMaxGlobalX() {
         return PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.getMain()).getFloat(MAX_GLOBAL_X, MAX_GLOBAL_X_VAL);
+                DroidHandler.main).getFloat(MAX_GLOBAL_X, MAX_GLOBAL_X_VAL);
     }
 
     public static float getMinGlobalX() {
         return PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.getMain()).getFloat(MIN_GLOBAL_X, MIN_GLOBAL_X_VAL);
+                DroidHandler.main).getFloat(MIN_GLOBAL_X, MIN_GLOBAL_X_VAL);
     }
 
     public static float getMaxGlobalY() {
         return PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.getMain()).getFloat(MAX_GLOBAL_Y, MAX_GLOBAL_Y_VAL);
+                DroidHandler.main).getFloat(MAX_GLOBAL_Y, MAX_GLOBAL_Y_VAL);
     }
 
     public static float getMinGlobalY() {
         return PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.getMain()).getFloat(MIN_GLOBAL_Y, MIN_GLOBAL_Y_VAL);
+                DroidHandler.main).getFloat(MIN_GLOBAL_Y, MIN_GLOBAL_Y_VAL);
     }
 
     public static float getAlpha() {
         return Float.parseFloat(PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.getMain()).getString(ALPHA, String.valueOf(ALPHA_VAL)));
+                DroidHandler.main).getString(ALPHA, String.valueOf(ALPHA_VAL)));
     }
 
     public static boolean swapSensorOrientation() {
         return PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.getMain()).getBoolean(SWAP_SENSOR_ORIENTATION, SWAP_SENSOR_ORIENTATION_VAL);
+                DroidHandler.main).getBoolean(SWAP_SENSOR_ORIENTATION, SWAP_SENSOR_ORIENTATION_VAL);
     }
 }

@@ -19,7 +19,7 @@ public class ConnectAsyncTask extends NaviAsyncTask<Object> {
         final ClientListener listener = (ClientListener) args[2];
 
         try {
-            DroidHandler.getNetwork().connect(hostname, port, listener);
+            DroidHandler.network.connect(hostname, port, listener);
             getMain().connected(hostname, port);
         } catch (IOException e) {
             getMain().notConnected(hostname, port);
