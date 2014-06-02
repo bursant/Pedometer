@@ -3,6 +3,13 @@ Pedometer
 
 Android Pedometer Pedorepo.
 
+Required
+========
+
+* `protbuf` with `protoc`
+* `maven`
+* `adb`, `jdk`
+
 IDE Configuration
 =================
 
