@@ -1,4 +1,4 @@
-package pedometer.droid.helper;
+package pedometer.droid;
 
 import pedometer.common.connector.client.ClientConnector;
 import pedometer.common.connector.client.ClientListener;

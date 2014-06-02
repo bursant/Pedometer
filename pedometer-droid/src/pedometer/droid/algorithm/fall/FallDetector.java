@@ -30,8 +30,7 @@ public class FallDetector implements IDetector {
         double vector = Math.sqrt(
                 (event.values[0] * event.values[0]) +
                         (event.values[1] * event.values[1]) +
-                        (event.values[2] * event.values[2])
-        );
+                        (event.values[2] * event.values[2]));
 
         buffer.remove();
         buffer.add(vector);

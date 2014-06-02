@@ -4,14 +4,14 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,17 +29,14 @@ import pedometer.droid.algorithm.common.IDetectorListener;
 import pedometer.droid.algorithm.fall.FallDetector;
 import pedometer.droid.algorithm.step.ExponentialMovingAverage;
 import pedometer.droid.algorithm.step.StepDetector;
-import pedometer.droid.helper.DroidAccelSensor;
-import pedometer.droid.helper.DroidNetwork;
 import pedometer.droid.task.ConnectAsyncTask;
 import pedometer.droid.task.DisconnectAsyncTask;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 
 import java.io.IOException;
-import java.util.Random;
 
-public class DroidMain extends RoboActivity implements IDetectorListener {
+public class DroidMain extends RoboActivity implements SensorEventListener, IDetectorListener {
 
     public static final int PLEASE_WAIT_DIALOG = 1;
 
@@ -51,20 +48,18 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
 
     private StepDetector stepDetector;
 
-    private DroidAccelSensor sensorAccel;
+    @InjectView(R.id.stepDetector)
+    private TextView stepDetectorTextView;
 
-    @InjectView(R.id.connectButton)
-    private Button connectButton;
-
-    @InjectView(R.id.accSensor)
-    private TextView accSensorTextView;
+    @InjectView(R.id.fallDetector)
+    private TextView fallDetectorTextView;
 
     @InjectView(R.id.chart)
     private LinearLayout chartLayout;
 
     private GraphicalView mChart;
 
-    private XYMultipleSeriesDataset mDataset = new XYMultipleSeriesDataset();
+    private XYMultipleSeriesDataset mDataSet = new XYMultipleSeriesDataset();
 
     private XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
 
@@ -72,20 +67,7 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
 
     private XYSeriesRenderer mCurrentRenderer;
 
-    private void initChart() {
-        mCurrentSeries = new XYSeries("Sample Data");
-        mDataset.addSeries(mCurrentSeries);
-        mCurrentRenderer = new XYSeriesRenderer();
-        mRenderer.addSeriesRenderer(mCurrentRenderer);
-    }
-
-    private void addSampleData() {
-        mCurrentSeries.add(1, 2);
-        mCurrentSeries.add(2, 3);
-        mCurrentSeries.add(3, 2);
-        mCurrentSeries.add(4, 5);
-        mCurrentSeries.add(5, 4);
-    }
+    private long startTimeStamp;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,12 +76,48 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         DroidHandler.setMain(this);
         setContentView(R.layout.main);
 
-        connectButton.setText(network.isConnected() ? "Disconnect" : "Connect");
+        avg = new ExponentialMovingAverage(DroidPreference.getAlpha());
 
-        connectButton.setOnClickListener(new View.OnClickListener() {
+        fallDetector = new FallDetector();
+        stepDetector = new StepDetector(avg);
 
-            @Override
-            public void onClick(View view) {
+        DetectorManager detectorManager = DroidHandler.getDetectorManager();
+
+        detectorManager.registerDetector(fallDetector);
+        detectorManager.registerDetector(stepDetector);
+
+        detectorManager.registerListener(this);
+
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        sensorManager.registerListener(detectorManager, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        if (mChart == null) {
+            mCurrentSeries = new XYSeries("Vector");
+            mDataSet.addSeries(mCurrentSeries);
+            mCurrentRenderer = new XYSeriesRenderer();
+            mRenderer.addSeriesRenderer(mCurrentRenderer);
+
+            mChart = ChartFactory.getCubeLineChartView(this, mDataSet, mRenderer, 0.3f);
+            chartLayout.addView(mChart);
+        }
+
+        startTimeStamp = System.currentTimeMillis();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.connect:
                 if (!network.isConnected()) {
                     String hostname = PreferenceManager.getDefaultSharedPreferences(DroidMain.this)
                             .getString(DroidPreference.HOST, DroidPreference.HOST_VAL);
@@ -119,54 +137,7 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
                 } else {
                     new DisconnectAsyncTask(DroidMain.this).execute();
                 }
-            }
-        });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        avg = new ExponentialMovingAverage(DroidPreference.getAlpha());
-
-        fallDetector = new FallDetector();
-        stepDetector = new StepDetector(avg);
-
-        sensorAccel = new DroidAccelSensor(DroidPreference.swapSensorOrientation(), this);
-
-        DetectorManager detectorManager = DroidHandler.getDetectorManager();
-
-        detectorManager.registerDetector(fallDetector);
-        detectorManager.registerDetector(stepDetector);
-
-        detectorManager.registerListener(this);
-
-        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-        Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        sensorManager.registerListener(sensorAccel, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(detectorManager, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
-
-        if (mChart == null) {
-            initChart();
-            addSampleData();
-            mChart = ChartFactory.getCubeLineChartView(this, mDataset, mRenderer, 0.3f);
-            chartLayout.addView(mChart);
-        } else {
-            mChart.repaint();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+                return true;
             case R.id.preferences:
                 Intent myIntent = new Intent(this, DroidPreference.class);
                 startActivity(myIntent);
@@ -177,13 +148,12 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
 
         DetectorManager detectorManager = DroidHandler.getDetectorManager();
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-        sensorManager.unregisterListener(sensorAccel);
         sensorManager.unregisterListener(detectorManager);
 
         detectorManager.unregisterDetector(fallDetector);
@@ -217,7 +187,6 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                connectButton.setText("Disconnect");
                 Toast.makeText(DroidMain.this, "Connected to " + hostname + "/" + port, Toast.LENGTH_LONG).show();
             }
         });
@@ -236,7 +205,6 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                connectButton.setText("Connect");
                 Toast.makeText(DroidMain.this, "Disconnected", Toast.LENGTH_LONG).show();
             }
         });
@@ -251,27 +219,21 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         });
     }
 
-    public void setAccSensor(final float values[]) {
-        setSensor(accSensorTextView, "acc", values);
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        double vector = Math.sqrt((event.values[0] * event.values[0]) +
+                (event.values[1] * event.values[1]) +
+                (event.values[2] * event.values[2]));
+
+        long timeStamp = System.currentTimeMillis();
+        mRenderer.setXAxisMin((timeStamp - startTimeStamp) / 1000.0 - 10.0);
+        mRenderer.setXAxisMax((timeStamp - startTimeStamp) / 1000.0);
+        mCurrentSeries.add((timeStamp - startTimeStamp) / 1000.0, vector);
+        mChart.repaint();
     }
 
-    private double d = 6;
-
-    private Random rand = new Random(System.currentTimeMillis());
-
-    private void setSensor(final TextView view, final String pre, final float values[]) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                view.setText(pre + ":\n\tx: " + values[0] + ";\n\ty: " + values[1] + ";\n\tz: " + values[2]);
-                if (mChart != null) {
-                    mCurrentSeries.remove(0);
-                    mCurrentSeries.add(d, rand.nextInt(10));
-                    d += 1;
-                    mChart.repaint();
-                }
-            }
-        });
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
     }
 
     @Override
@@ -281,9 +243,11 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
             public void run() {
                 if (detector != null) {
                     if (detector.equals(fallDetector)) {
-                        Toast.makeText(DroidMain.this, "Fall detected, current count: " + count, Toast.LENGTH_LONG).show();
+                        fallDetectorTextView.setText(count + " falls.");
+                        /* Toast.makeText(DroidMain.this, "Fall detected, current count: " + count, Toast.LENGTH_LONG).show(); */
                     } else if (detector.equals(stepDetector)) {
-                        Toast.makeText(DroidMain.this, "Step detected, current count: " + count, Toast.LENGTH_LONG).show();
+                        stepDetectorTextView.setText(count + " steps.");
+                        /* Toast.makeText(DroidMain.this, "Step detected, current count: " + count, Toast.LENGTH_LONG).show(); */
                     }
                 }
             }

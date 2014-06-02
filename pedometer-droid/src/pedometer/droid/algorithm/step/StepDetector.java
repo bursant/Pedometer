@@ -26,8 +26,7 @@ public class StepDetector implements IDetector {
         double vector = Math.sqrt(
                 (event.values[0] * event.values[0]) +
                         (event.values[1] * event.values[1]) +
-                        (event.values[2] * event.values[2])
-        );
+                        (event.values[2] * event.values[2]));
 
         double average = avg.average(vector);
         long time = System.currentTimeMillis();

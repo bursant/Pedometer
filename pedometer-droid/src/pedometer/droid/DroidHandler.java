@@ -3,7 +3,6 @@ package pedometer.droid;
 import pedometer.droid.algorithm.common.DetectorManager;
 import pedometer.droid.algorithm.common.IDetector;
 import pedometer.droid.algorithm.common.IDetectorListener;
-import pedometer.droid.helper.DroidNetwork;
 
 import java.util.LinkedList;
 import java.util.List;

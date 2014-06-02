@@ -12,32 +12,31 @@
             android:layout_marginTop="10dp" android:layout_marginBottom="10dp"
             android:layout_alignParentLeft="true" android:layout_alignParentRight="true"
             tools:ignore="UselessParent">
-        <Button
+        <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/connect"
-                android:id="@+id/connectButton"
-                android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/zero_steps"
+                android:id="@+id/stepDetector"
                 android:layout_margin="10dp"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_below="@id/connectButton"
                 android:layout_centerHorizontal="true"
-                android:text="@string/no_data"
-                android:id="@+id/accSensor"
-                android:layout_margin="10dp"/>
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/zero_falls"
+                android:id="@+id/fallDetector"
+                android:layout_margin="10dp"
+                android:layout_below="@id/stepDetector"/>
     </RelativeLayout>
 
     <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:id="@+id/chart"
             android:layout_below="@id/buttonsLayout"
             android:orientation="vertical">
-
     </LinearLayout>
 
 </RelativeLayout>

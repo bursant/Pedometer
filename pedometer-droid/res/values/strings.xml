@@ -4,4 +4,6 @@
     <string name="preferences">Preferences</string>
     <string name="no_data">No data from sensor.</string>
     <string name="connect">Connect</string>
+    <string name="zero_falls">Zero falls.</string>
+    <string name="zero_steps">Zero steps.</string>
 </resources>
