@@ -12,8 +12,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.achartengine.ChartFactory;
+import org.achartengine.GraphicalView;
+import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
+import org.achartengine.renderer.XYSeriesRenderer;
 import pedometer.app.R;
 import pedometer.common.connector.client.ClientListener;
 import pedometer.droid.algorithm.common.DetectorManager;
@@ -23,7 +30,6 @@ import pedometer.droid.algorithm.fall.FallDetector;
 import pedometer.droid.algorithm.step.ExponentialMovingAverage;
 import pedometer.droid.algorithm.step.StepDetector;
 import pedometer.droid.helper.DroidAccelSensor;
-import pedometer.droid.helper.DroidGyroSensor;
 import pedometer.droid.helper.DroidNetwork;
 import pedometer.droid.task.ConnectAsyncTask;
 import pedometer.droid.task.DisconnectAsyncTask;
@@ -31,6 +37,7 @@ import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class DroidMain extends RoboActivity implements IDetectorListener {
 
@@ -46,16 +53,39 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
 
     private DroidAccelSensor sensorAccel;
 
-    private DroidGyroSensor sensorGyro;
-
     @InjectView(R.id.connectButton)
     private Button connectButton;
 
     @InjectView(R.id.accSensor)
     private TextView accSensorTextView;
 
-    @InjectView(R.id.gyroSensor)
-    private TextView gyroSensorTextView;
+    @InjectView(R.id.chart)
+    private LinearLayout chartLayout;
+
+    private GraphicalView mChart;
+
+    private XYMultipleSeriesDataset mDataset = new XYMultipleSeriesDataset();
+
+    private XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
+
+    private XYSeries mCurrentSeries;
+
+    private XYSeriesRenderer mCurrentRenderer;
+
+    private void initChart() {
+        mCurrentSeries = new XYSeries("Sample Data");
+        mDataset.addSeries(mCurrentSeries);
+        mCurrentRenderer = new XYSeriesRenderer();
+        mRenderer.addSeriesRenderer(mCurrentRenderer);
+    }
+
+    private void addSampleData() {
+        mCurrentSeries.add(1, 2);
+        mCurrentSeries.add(2, 3);
+        mCurrentSeries.add(3, 2);
+        mCurrentSeries.add(4, 5);
+        mCurrentSeries.add(5, 4);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,7 +133,6 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         stepDetector = new StepDetector(avg);
 
         sensorAccel = new DroidAccelSensor(DroidPreference.swapSensorOrientation(), this);
-        sensorGyro = new DroidGyroSensor(DroidPreference.swapSensorOrientation(), this);
 
         DetectorManager detectorManager = DroidHandler.getDetectorManager();
 
@@ -118,8 +147,14 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         sensorManager.registerListener(sensorAccel, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(detectorManager, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
-        Sensor gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        sensorManager.registerListener(sensorGyro, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        if (mChart == null) {
+            initChart();
+            addSampleData();
+            mChart = ChartFactory.getCubeLineChartView(this, mDataset, mRenderer, 0.3f);
+            chartLayout.addView(mChart);
+        } else {
+            mChart.repaint();
+        }
     }
 
     @Override
@@ -149,7 +184,6 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         sensorManager.unregisterListener(sensorAccel);
-        sensorManager.unregisterListener(sensorGyro);
         sensorManager.unregisterListener(detectorManager);
 
         detectorManager.unregisterDetector(fallDetector);
@@ -221,15 +255,21 @@ public class DroidMain extends RoboActivity implements IDetectorListener {
         setSensor(accSensorTextView, "acc", values);
     }
 
-    public void setGyroSensor(float values[]) {
-        setSensor(gyroSensorTextView, "gyro", values);
-    }
+    private double d = 6;
+
+    private Random rand = new Random(System.currentTimeMillis());
 
     private void setSensor(final TextView view, final String pre, final float values[]) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 view.setText(pre + ":\n\tx: " + values[0] + ";\n\ty: " + values[1] + ";\n\tz: " + values[2]);
+                if (mChart != null) {
+                    mCurrentSeries.remove(0);
+                    mCurrentSeries.add(d, rand.nextInt(10));
+                    d += 1;
+                    mChart.repaint();
+                }
             }
         });
     }
