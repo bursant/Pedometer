@@ -24,6 +24,7 @@ import pedometer.app.R;
 import pedometer.common.connector.client.ClientListener;
 import pedometer.droid.algorithm.common.IDetector;
 import pedometer.droid.algorithm.common.IDetectorListener;
+import pedometer.droid.algorithm.common.MotionVector;
 import pedometer.droid.algorithm.fall.FallDetector;
 import pedometer.droid.algorithm.step.ExponentialMovingAverage;
 import pedometer.droid.algorithm.step.StepDetector;
@@ -277,8 +278,7 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        double vector = Math.sqrt((event.values[0] * event.values[0]) +
-                (event.values[1] * event.values[1]) + (event.values[2] * event.values[2]));
+        Double vector = MotionVector.compute(event.values[0], event.values[1], event.values[2]);
 
         long timeStamp = System.currentTimeMillis();
 

@@ -2,6 +2,7 @@ package pedometer.droid.algorithm.step;
 
 import android.hardware.SensorEvent;
 import pedometer.droid.algorithm.common.IDetector;
+import pedometer.droid.algorithm.common.MotionVector;
 
 /**
  * Created by bursant on 17.05.14.
@@ -23,17 +24,13 @@ public class StepDetector implements IDetector {
 
     @Override
     public boolean detect(SensorEvent event) {
-        double vector = Math.sqrt(
-                (event.values[0] * event.values[0]) +
-                        (event.values[1] * event.values[1]) +
-                        (event.values[2] * event.values[2]));
+        Double vector = MotionVector.compute(event.values[0], event.values[1], event.values[2]);
 
         double average = avg.average(vector);
         long time = System.currentTimeMillis();
 
         if (vector - average > DifferenceDelta && time - LastStepDetection > StepDetectionDelta) {
             LastStepDetection = time;
-            //TODO(bursant): You may notify something here that step was detected.
             return true;
         }
 
