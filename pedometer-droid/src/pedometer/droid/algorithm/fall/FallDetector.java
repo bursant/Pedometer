@@ -15,18 +15,17 @@ public class FallDetector implements IDetector {
 
     private enum State{
         fall,
-        afterfall,
-        nofall
+        afterFall,
+        noFall
     }
 
-    private double afterFallThreshold = 0.35;
-    long afterFallTime = 2000;
+    private static final double afterFallThreshold = 0.35;
+    private static final long afterFallTime = 2000;
 
-    private double fallInitThreshold = 10.0;
-    private double fallDurationThreshold = 5.0;
-    private double fallEndThreshold = 1.0;
+    private static final double fallInitThreshold = 10.0;
+    private static final double fallDurationThreshold = 5.0;
+    private static final double fallEndThreshold = 1.0;
 
-    private double fallBeginTimestamp;
     private double fallEndTimestamp;
 
     private State state;
@@ -34,21 +33,22 @@ public class FallDetector implements IDetector {
 
     public FallDetector() {
         buffer = new LinkedList<Double>();
-        state = State.nofall;
+        state = State.noFall;
     }
 
 
     @Override
     public boolean detect(SensorEvent event) {
-        Double vector = MotionVector.compute(event.values[0], event.values[1], event.values[2]);
+        Double vector;
+        vector = MotionVector.compute(event.values[0], event.values[1], event.values[2]);
         long timestamp = System.currentTimeMillis();
 
         switch(state){
             case fall:
                 return fallProcedure(vector, timestamp);
-            case nofall:
-                return noFallProcedure(vector, timestamp);
-            case afterfall:
+            case noFall:
+                return noFallProcedure(vector);
+            case afterFall:
                 return afterFallProcedure(vector, timestamp);
         }
 
@@ -59,11 +59,11 @@ public class FallDetector implements IDetector {
 
         if(vector < fallEndThreshold){
             if(getAverage() > fallDurationThreshold) {
-                state = State.afterfall;
+                state = State.afterFall;
                 fallEndTimestamp = timestamp;
             }
             else{
-                state = State.nofall;
+                state = State.noFall;
             }
             buffer.clear();
         }
@@ -77,16 +77,15 @@ public class FallDetector implements IDetector {
         else{
             double value = getAverage();
             buffer.clear();
-            state = State.nofall;
+            state = State.noFall;
             if(value < afterFallThreshold)
                 return true;
         }
         return false;
     }
 
-    private boolean noFallProcedure(double vector, long timestamp){
+    private boolean noFallProcedure(double vector){
         if(vector > fallInitThreshold) {
-            fallBeginTimestamp = timestamp;
             state = State.fall;
             buffer.add(vector);
         }
