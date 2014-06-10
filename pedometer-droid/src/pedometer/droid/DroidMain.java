@@ -8,7 +8,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -21,19 +20,14 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 import pedometer.app.R;
-import pedometer.common.connector.client.ClientListener;
 import pedometer.droid.algorithm.common.IDetector;
 import pedometer.droid.algorithm.common.IDetectorListener;
 import pedometer.droid.algorithm.common.MotionVector;
 import pedometer.droid.algorithm.fall.FallDetector;
 import pedometer.droid.algorithm.step.ExponentialMovingAverage;
 import pedometer.droid.algorithm.step.StepDetector;
-import pedometer.droid.task.ConnectAsyncTask;
-import pedometer.droid.task.DisconnectAsyncTask;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
-
-import java.io.IOException;
 
 public class DroidMain extends RoboActivity implements SensorEventListener, IDetectorListener {
 
@@ -126,37 +120,19 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
     @Override
     protected void onStop() {
         super.onStop();
-
         stop();
-
-        try {
-            DroidHandler.network.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
-
-    private Menu menu;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
-        this.menu = menu;
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.connect: {
-                if (!DroidHandler.network.isConnected()) {
-                    connect();
-                } else {
-                    disconnect();
-                }
-                return true;
-            }
             case R.id.preferences: {
                 Intent myIntent = new Intent(this, DroidPreference.class);
                 startActivity(myIntent);
@@ -193,28 +169,6 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
         DroidHandler.detectorManager.unregisterListener(this);
     }
 
-    private void connect() {
-        String hostname = PreferenceManager.getDefaultSharedPreferences(DroidMain.this)
-                .getString(DroidPreference.HOST, DroidPreference.HOST_VAL);
-        String port = PreferenceManager.getDefaultSharedPreferences(DroidMain.this)
-                .getString(DroidPreference.PORT, DroidPreference.PORT_VAL);
-
-        new ConnectAsyncTask(DroidMain.this).execute(hostname, port, new ClientListener() {
-            @Override
-            public void notifyReceived(byte[] object) {
-            }
-
-            @Override
-            public void notifyDisconnected() {
-                disconnected();
-            }
-        });
-    }
-
-    private void disconnect() {
-        new DisconnectAsyncTask(DroidMain.this).execute();
-    }
-
     @Override
     public Dialog onCreateDialog(int dialogId) {
         switch (dialogId) {
@@ -228,52 +182,6 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
             default:
                 return super.onCreateDialog(dialogId);
         }
-    }
-
-    public void connected(final String hostname, final int port) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (DroidMain.this.menu != null) {
-                    MenuItem item = DroidMain.this.menu.findItem(R.id.connect);
-                    if (item != null)
-                        item.setTitle("Disconnect");
-                }
-                Toast.makeText(DroidMain.this, "Connected to " + hostname + "/" + port, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    public void notConnected(final String hostname, final int port) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(DroidMain.this, "Cannot connect to " + hostname + "/" + port, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    public void disconnected() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (DroidMain.this.menu != null) {
-                    MenuItem item = DroidMain.this.menu.findItem(R.id.connect);
-                    if (item != null)
-                        item.setTitle("Connect");
-                }
-                Toast.makeText(DroidMain.this, "Disconnected", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    public void notDisconnected() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(DroidMain.this, "Error during disconnecting", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override
