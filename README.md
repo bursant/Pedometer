@@ -23,5 +23,4 @@ Howto
 -----
 
  * Grab this project using `git clone`
- * Go into the `./Pedometer/pedometer-common` catalog and run `mvn install`.
  * Open or import project `./Pedometer/` using `./Pedometer/pom.xml` as project file.
