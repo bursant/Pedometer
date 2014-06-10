@@ -13,7 +13,7 @@ import java.util.Queue;
  */
 public class FallDetector implements IDetector {
 
-    private enum State{
+    private enum State {
         fall,
         afterFall,
         noFall
@@ -43,7 +43,7 @@ public class FallDetector implements IDetector {
         vector = MotionVector.compute(event.values[0], event.values[1], event.values[2]);
         long timestamp = System.currentTimeMillis();
 
-        switch(state){
+        switch (state) {
             case fall:
                 return fallProcedure(vector, timestamp);
             case noFall:
@@ -55,14 +55,13 @@ public class FallDetector implements IDetector {
         return false;
     }
 
-    private boolean fallProcedure(double vector, long timestamp){
+    private boolean fallProcedure(double vector, long timestamp) {
 
-        if(vector < fallEndThreshold){
-            if(getAverage() > fallDurationThreshold) {
+        if (vector < fallEndThreshold) {
+            if (getAverage() > fallDurationThreshold) {
                 state = State.afterFall;
                 fallEndTimestamp = timestamp;
-            }
-            else{
+            } else {
                 state = State.noFall;
             }
             buffer.clear();
@@ -70,35 +69,34 @@ public class FallDetector implements IDetector {
         return false;
     }
 
-    private boolean afterFallProcedure(double vector, long timestamp){
-        if(timestamp - fallEndTimestamp < afterFallTime){
+    private boolean afterFallProcedure(double vector, long timestamp) {
+        if (timestamp - fallEndTimestamp < afterFallTime) {
             buffer.add(vector);
-        }
-        else{
+        } else {
             double value = getAverage();
             buffer.clear();
             state = State.noFall;
-            if(value < afterFallThreshold)
+            if (value < afterFallThreshold)
                 return true;
         }
         return false;
     }
 
-    private boolean noFallProcedure(double vector){
-        if(vector > fallInitThreshold) {
+    private boolean noFallProcedure(double vector) {
+        if (vector > fallInitThreshold) {
             state = State.fall;
             buffer.add(vector);
         }
         return false;
     }
 
-    private double getAverage(){
+    private double getAverage() {
         double avg = 0.0;
 
-        for(double item : buffer)
+        for (double item : buffer)
             avg += item;
 
-        avg = avg/buffer.size();
+        avg = avg / buffer.size();
         return avg;
     }
 

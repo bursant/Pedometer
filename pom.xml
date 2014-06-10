@@ -14,9 +14,7 @@
     </properties>
 
     <modules>
-        <module>pedometer-common</module>
         <module>pedometer-droid</module>
-        <module>pedometer-server</module>
     </modules>
 
     <build>

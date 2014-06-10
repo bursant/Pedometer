@@ -37,5 +37,6 @@ tmp/
 *~.nib
 
 *~
+.~*
 
 pedometer-droid/local.properties

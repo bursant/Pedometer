@@ -12,8 +12,6 @@ import java.util.List;
 
 public class DroidHandler {
 
-    public static final DroidNetwork network = new DroidNetwork();
-
     static final DetectorManager detectorManager;
 
     static {

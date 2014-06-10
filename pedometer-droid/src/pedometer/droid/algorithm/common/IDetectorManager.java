@@ -22,9 +22,18 @@ public interface IDetectorManager {
      */
     boolean getLastResultForDetector(IDetector detector);
 
+    /**
+     * Register listener.
+     */
     boolean registerListener(IDetectorListener listener);
 
+    /**
+     * Unregister listener.
+     */
     boolean unregisterListener(IDetectorListener listener);
 
+    /**
+     * Return count for detector.
+     */
     int getCountForDetector(IDetector detector);
 }

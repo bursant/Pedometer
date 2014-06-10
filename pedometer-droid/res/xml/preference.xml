@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        >
-
-    <PreferenceCategory
-            android:title="Network settings">
-        <EditTextPreference
-                android:key="host"
-                android:title="Host"
-                android:summary="Hostname or address IP of robot"
-                android:defaultValue="192.168.2.200"/>
-        <EditTextPreference
-                android:key="port"
-                android:title="Port"
-                android:summary="Port of robot"
-                android:defaultValue="1234"
-                android:inputType="number"/>
-    </PreferenceCategory>
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
             android:title="Driver calibration">
