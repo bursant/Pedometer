@@ -26,7 +26,7 @@ public class DroidPreference extends PreferenceActivity {
     public static final float MIN_GLOBAL_Y_VAL = -7.5f;
 
     public static final String ALPHA = "alpha";
-    public static final float ALPHA_VAL = 0.3f;
+    public static final float ALPHA_VAL = 0.1f;
 
     public static final String SWAP_SENSOR_ORIENTATION = "swapSensorOrientation";
     public static final boolean SWAP_SENSOR_ORIENTATION_VAL = false;

@@ -37,7 +37,7 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
     @Override
     public void onSensorChanged(SensorEvent event) {
         Double vector = MotionVector.compute(event.values[0], event.values[1], event.values[2]);
-        Log.i("SENSOR", vector.toString());
+
         for (IDetector detector : detectors) {
             boolean result = detector.detect(event);
             results.put(detector, result);

@@ -19,10 +19,10 @@ public class FallDetector implements IDetector {
         noFall
     }
 
-    private static final double afterFallThreshold = 0.35;
-    private static final long afterFallTime = 2000;
+    private static final double afterFallThreshold = 0.4;
+    private static final long afterFallTime = 500;
 
-    private static final double fallInitThreshold = 10.0;
+    private static final double fallInitThreshold = 8.0;
     private static final double fallDurationThreshold = 5.0;
     private static final double fallEndThreshold = 1.0;
 

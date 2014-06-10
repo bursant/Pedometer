@@ -289,6 +289,7 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
             mCurrentSeries.add((timeStamp - DroidHandler.startTimeStamp) / 1000.0, vector);
         if (mChart != null)
             mChart.repaint();
+
     }
 
     @Override
