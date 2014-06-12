@@ -8,6 +8,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.text.format.Time;
 import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -36,6 +38,9 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
     @InjectView(R.id.start)
     private Button startButton;
 
+    @InjectView(R.id.share)
+    private Button shareButton;
+
     @InjectView(R.id.stepDetector)
     private TextView stepDetectorTextView;
 
@@ -63,13 +68,45 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
         setContentView(R.layout.main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Time now = new Time();
+                now.setToNow();
+                String[] loinc = new String[2];
+                loinc[0] = "55423-8";
+                loinc[1] = "54854-5";
+
+                String[] values = new String[2];
+                values[0] = stepDetectorTextView.getText().toString().replace(" steps", "");
+                values[1] = fallDetectorTextView.getText().toString().replace(" falls", "");
+
+                Bundle bundle = new Bundle();
+                bundle.putString("Action", "meddev.MEASUREMENT");
+                bundle.putString("Data", "device://Pedometer");
+                bundle.putString("Name", "Pedometer");
+                bundle.putString("Date", now.toString());
+                bundle.putString("Action", "meddev.MEASUREMENT");
+                bundle.putStringArray("LOINC_LIST", loinc);
+                bundle.putStringArray("LOINC_VALUES", values);
+
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtras(bundle);
+                sendIntent.setType("text/MedicalIntent");
+                startActivity(sendIntent);
+
+                Toast.makeText(getApplicationContext(), "Shared: " + values[0] + values[1], Toast.LENGTH_SHORT).show();
+            }
+        });
+
         if (DroidHandler.avg == null)
             DroidHandler.avg = new ExponentialMovingAverage(DroidPreference.getAlpha());
 
         if (DroidHandler.fallDetector == null)
             DroidHandler.fallDetector = new FallDetector();
         if (DroidHandler.stepDetector == null)
-            DroidHandler.stepDetector = new StepDetector(DroidHandler.avg);
+            DroidHandler.stepDetector = new StepDetector(DroidHandler.avg, DroidPreference.getStepDetectionDelta());
 
         if (mCurrentSeries == null) {
             mCurrentSeries = new XYSeries("Vector");

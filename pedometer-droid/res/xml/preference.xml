@@ -14,6 +14,12 @@
                 android:summary="Alpha low pass"
                 android:defaultValue="0.3"
                 android:inputType="numberDecimal"/>
+        <EditTextPreference
+                android:key="delta"
+                android:title="Delta"
+                android:summary="Step duration"
+                android:defaultValue="700"
+                android:inputType="numberDecimal"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

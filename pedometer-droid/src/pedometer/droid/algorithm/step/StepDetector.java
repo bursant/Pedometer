@@ -23,10 +23,10 @@ public class StepDetector implements IDetector {
     private double minPeak;
     private int count;
 
-    public StepDetector(ExponentialMovingAverage avg) {
+    public StepDetector(ExponentialMovingAverage avg, long StepDetectionDelta) {
         this.avg = avg;
         LastStepDetection = 0;
-        StepDetectionDelta = 700;
+        this.StepDetectionDelta = StepDetectionDelta;
         DifferenceDelta = 1.0;
         minPeak = 3.0;
         count = 1;
