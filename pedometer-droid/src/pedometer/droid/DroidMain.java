@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.text.format.Time;
@@ -90,11 +91,11 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
                 bundle.putStringArray("LOINC_LIST", loinc);
                 bundle.putStringArray("LOINC_VALUES", values);
 
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtras(bundle);
-                sendIntent.setType("text/MedicalIntent");
-                startActivity(sendIntent);
+                Intent broadcastIntent = new Intent();
+                broadcastIntent.setAction("meddev.MEASUREMENT");
+                broadcastIntent.setData(Uri.parse("device://Pedometer"));
+                broadcastIntent.putExtras(bundle);
+                sendBroadcast(broadcastIntent);
 
                 Toast.makeText(getApplicationContext(), "Shared: " + values[0] + values[1], Toast.LENGTH_SHORT).show();
             }
