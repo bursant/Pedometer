@@ -3,7 +3,6 @@ package pedometer.droid.algorithm.common;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +95,18 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
 
     @Override
     public int getCountForDetector(IDetector detector) {
-        return counts.get(detector);
+        try {
+            return counts.get(detector);
+        } catch (NullPointerException e) {
+            return -1;
+        }
+    }
+
+    public void resetCounters() {
+        for (IDetector detector : counts.keySet()) {
+            synchronized (detector) {
+                counts.put(detector, 0);
+            }
+        }
     }
 }

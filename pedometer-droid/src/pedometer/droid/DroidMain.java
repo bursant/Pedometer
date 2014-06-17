@@ -9,7 +9,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.text.format.Time;
 import android.view.*;
 import android.widget.Button;
@@ -38,6 +37,9 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
 
     @InjectView(R.id.start)
     private Button startButton;
+
+    @InjectView(R.id.clear)
+    private Button clearButton;
 
     @InjectView(R.id.share)
     private Button shareButton;
@@ -74,13 +76,14 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
             public void onClick(View v) {
                 Time now = new Time();
                 now.setToNow();
+
                 String[] loinc = new String[2];
                 loinc[0] = "55423-8";
                 loinc[1] = "54854-5";
 
                 String[] values = new String[2];
-                values[0] = stepDetectorTextView.getText().toString().replace(" steps", "");
-                values[1] = fallDetectorTextView.getText().toString().replace(" falls", "");
+                values[0] = String.valueOf(DroidHandler.detectorManager.getCountForDetector(DroidHandler.stepDetector));
+                values[1] = String.valueOf(DroidHandler.detectorManager.getCountForDetector(DroidHandler.fallDetector));
 
                 Bundle bundle = new Bundle();
                 bundle.putString("Action", "meddev.MEASUREMENT");
@@ -97,7 +100,7 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
                 broadcastIntent.putExtras(bundle);
                 sendBroadcast(broadcastIntent);
 
-                Toast.makeText(getApplicationContext(), "Shared: " + values[0] + values[1], Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Shared: " + values[0] + " steps , " + values[1] + " falls.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -133,7 +136,6 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
             startButton.setText("Stop");
         }
 
-
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,6 +153,15 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
                     DroidMain.this.startButton.setText("Start");
                     Toast.makeText(DroidMain.this, "Stopped", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DroidHandler.detectorManager.resetCounters();
+                DroidMain.this.stepDetectorTextView.setText("0 steps.");
+                DroidMain.this.stepDetectorTextView.setText("0 falls.");
             }
         });
     }
@@ -183,8 +194,12 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
     }
 
     private void register() {
+        DroidHandler.detectorManager.unregisterDetector(DroidHandler.fallDetector);
+        DroidHandler.detectorManager.unregisterDetector(DroidHandler.stepDetector);
+
         DroidHandler.detectorManager.registerDetector(DroidHandler.fallDetector);
         DroidHandler.detectorManager.registerDetector(DroidHandler.stepDetector);
+
         DroidHandler.detectorManager.registerListener(this);
     }
 
@@ -202,8 +217,6 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
     }
 
     private void unregister() {
-        DroidHandler.detectorManager.unregisterDetector(DroidHandler.fallDetector);
-        DroidHandler.detectorManager.unregisterDetector(DroidHandler.stepDetector);
         DroidHandler.detectorManager.unregisterListener(this);
     }
 

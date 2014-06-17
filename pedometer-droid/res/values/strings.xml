@@ -3,8 +3,9 @@
     <string name="app_name">PedoMeter</string>
     <string name="preferences">Preferences</string>
     <string name="no_data">No data from sensor.</string>
-    <string name="zero_falls">0 falls</string>
-    <string name="zero_steps">0 steps</string>
+    <string name="zero_falls">0 falls.</string>
+    <string name="zero_steps">0 steps.</string>
     <string name="start">Start</string>
     <string name="share">Share</string>
+    <string name="clear">Clear</string>
 </resources>

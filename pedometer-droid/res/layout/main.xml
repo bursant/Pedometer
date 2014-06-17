@@ -8,50 +8,66 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/buttonsLayout"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="10dp" android:layout_marginBottom="10dp"
-            android:layout_alignParentLeft="true" android:layout_alignParentRight="true"
             tools:ignore="UselessParent">
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/zero_steps"
-                android:id="@+id/stepDetector"
-                android:layout_marginLeft="15dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentLeft="true"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/zero_falls"
-                android:id="@+id/fallDetector"
-                android:layout_marginRight="15dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"/>
         <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/start"
                 android:id="@+id/start"
-                android:layout_alignParentTop="true" android:layout_toRightOf="@+id/stepDetector"/>
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/clear"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/clear"
+                android:id="@+id/clear"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"/>
         <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/share"
                 android:id="@+id/share"
-                android:layout_alignParentTop="true" android:layout_toLeftOf="@+id/fallDetector"/>
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@+id/clear"/>
     </RelativeLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonsLayout"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/textLayout">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/zero_falls"
+                android:id="@+id/fallDetector"
+                android:layout_gravity="center_horizontal"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/zero_steps"
+                android:id="@+id/stepDetector"
+                android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
 
     <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/chart"
-            android:layout_below="@id/buttonsLayout"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/textLayout">
     </LinearLayout>
 
 </RelativeLayout>
