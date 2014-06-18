@@ -2,7 +2,10 @@ package pedometer.droid;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,8 +25,6 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 import pedometer.app.R;
-import pedometer.droid.algorithm.common.IDetector;
-import pedometer.droid.algorithm.common.IDetectorListener;
 import pedometer.droid.algorithm.common.MotionVector;
 import pedometer.droid.algorithm.fall.FallDetector;
 import pedometer.droid.algorithm.step.ExponentialMovingAverage;
@@ -31,7 +32,7 @@ import pedometer.droid.algorithm.step.StepDetector;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 
-public class DroidMain extends RoboActivity implements SensorEventListener, IDetectorListener {
+public class DroidMain extends RoboActivity implements SensorEventListener {
 
     public static final int PLEASE_WAIT_DIALOG = 1;
 
@@ -62,6 +63,22 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
     private XYSeries mCurrentSeries;
 
     private XYSeriesRenderer mCurrentRenderer;
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(context, "Received", Toast.LENGTH_SHORT).show();
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                int steps = bundle.getInt(DroidService.STEPS);
+                int falls = bundle.getInt(DroidService.FALLS);
+
+                DroidMain.this.stepDetectorTextView.setText(steps + " steps.");
+                DroidMain.this.fallDetectorTextView.setText(falls + " falls.");
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,12 +122,12 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
         });
 
         if (DroidHandler.avg == null)
-            DroidHandler.avg = new ExponentialMovingAverage(DroidPreference.getAlpha());
+            DroidHandler.avg = new ExponentialMovingAverage(DroidPreference.getAlpha(getApplicationContext()));
 
         if (DroidHandler.fallDetector == null)
             DroidHandler.fallDetector = new FallDetector();
         if (DroidHandler.stepDetector == null)
-            DroidHandler.stepDetector = new StepDetector(DroidHandler.avg, DroidPreference.getStepDetectionDelta());
+            DroidHandler.stepDetector = new StepDetector(DroidHandler.avg, DroidPreference.getStepDetectionDelta(getApplicationContext()));
 
         if (mCurrentSeries == null) {
             mCurrentSeries = new XYSeries("Vector");
@@ -140,18 +157,16 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
             @Override
             public void onClick(View view) {
                 if (!DroidHandler.started) {
-                    register();
                     start();
                     DroidHandler.startTimeStamp = System.currentTimeMillis();
                     DroidHandler.started = true;
                     DroidMain.this.startButton.setText("Stop");
-                    Toast.makeText(DroidMain.this, "Started", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DroidMain.this, "Started measuring", Toast.LENGTH_SHORT).show();
                 } else {
                     stop();
-                    unregister();
                     DroidHandler.started = false;
                     DroidMain.this.startButton.setText("Start");
-                    Toast.makeText(DroidMain.this, "Stopped", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DroidMain.this, "Stopped measuring", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -164,6 +179,18 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
                 DroidMain.this.stepDetectorTextView.setText("0 falls.");
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(DroidService.NOTIFICATION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     @Override
@@ -193,31 +220,21 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
         }
     }
 
-    private void register() {
-        DroidHandler.detectorManager.unregisterDetector(DroidHandler.fallDetector);
-        DroidHandler.detectorManager.unregisterDetector(DroidHandler.stepDetector);
-
-        DroidHandler.detectorManager.registerDetector(DroidHandler.fallDetector);
-        DroidHandler.detectorManager.registerDetector(DroidHandler.stepDetector);
-
-        DroidHandler.detectorManager.registerListener(this);
-    }
-
     private void start() {
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        sensorManager.registerListener(DroidHandler.detectorManager, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        Intent pedoService = new Intent(this, DroidService.class);
+        startService(pedoService);
     }
 
     private void stop() {
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorManager.unregisterListener(DroidHandler.detectorManager);
         sensorManager.unregisterListener(this);
-    }
 
-    private void unregister() {
-        DroidHandler.detectorManager.unregisterListener(this);
+        Intent pedoService = new Intent(this, DroidService.class);
+        stopService(pedoService);
     }
 
     @Override
@@ -225,7 +242,7 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
         switch (dialogId) {
             case PLEASE_WAIT_DIALOG:
                 ProgressDialog dialog = new ProgressDialog(this);
-                dialog.setTitle("Connecting to server");
+                dialog.setTitle("Processing your request");
                 dialog.setMessage("Please wait....");
                 dialog.setCancelable(true);
                 return dialog;
@@ -253,21 +270,5 @@ public class DroidMain extends RoboActivity implements SensorEventListener, IDet
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-    }
-
-    @Override
-    public void notifyCountChange(final IDetector detector, final Integer count) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (detector != null) {
-                    if (detector.equals(DroidHandler.fallDetector)) {
-                        DroidMain.this.fallDetectorTextView.setText(count + " falls.");
-                    } else if (detector.equals(DroidHandler.stepDetector)) {
-                        DroidMain.this.stepDetectorTextView.setText(count + " steps.");
-                    }
-                }
-            }
-        });
     }
 }

@@ -8,6 +8,10 @@
                 android:key="swapSensorOrientation"
                 android:title="Sensor orientation"
                 android:summary="Swap sensor orientation"/>
+        <CheckBoxPreference
+                android:key="autoStart"
+                android:title="Auto-start"
+                android:summary="Start measuring at boot time"/>
         <EditTextPreference
                 android:key="alpha"
                 android:title="Alpha"

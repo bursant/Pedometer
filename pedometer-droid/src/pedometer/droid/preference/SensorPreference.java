@@ -12,8 +12,8 @@ import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
-import pedometer.droid.DroidPreference;
 import pedometer.app.R;
+import pedometer.droid.DroidPreference;
 
 public class SensorPreference extends DialogPreference implements SensorEventListener {
 
@@ -55,7 +55,7 @@ public class SensorPreference extends DialogPreference implements SensorEventLis
 
     @Override
     protected View onCreateDialogView() {
-        swapSensorOrientation = DroidPreference.swapSensorOrientation();
+        swapSensorOrientation = DroidPreference.swapSensorOrientation(getContext());
 
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);

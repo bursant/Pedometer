@@ -1,17 +1,15 @@
 package pedometer.droid;
 
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.text.format.Time;
-import android.widget.TextView;
-import android.widget.Toast;
 import pedometer.app.R;
-import roboguice.inject.InjectView;
 
 public class DroidPreference extends PreferenceActivity {
+
+    public static final String AUTO_START = "autoStart";
+    public static final boolean AUTO_START_VAL = false;
 
     public static final String ALPHA = "alpha";
     public static final float ALPHA_VAL = 0.03f;
@@ -28,18 +26,23 @@ public class DroidPreference extends PreferenceActivity {
         addPreferencesFromResource(R.xml.preference);
     }
 
-    public static float getAlpha() {
+    public static boolean isAutoStart(Context ctx) {
+        return Boolean.parseBoolean(PreferenceManager.getDefaultSharedPreferences(
+                ctx).getString(AUTO_START, String.valueOf(AUTO_START_VAL)));
+    }
+
+    public static float getAlpha(Context ctx) {
         return Float.parseFloat(PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.main).getString(ALPHA, String.valueOf(ALPHA_VAL)));
+                ctx).getString(ALPHA, String.valueOf(ALPHA_VAL)));
     }
 
-    public static long getStepDetectionDelta() {
+    public static long getStepDetectionDelta(Context ctx) {
         return Long.parseLong(PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.main).getString(STEP_DETECTION_DELTA, String.valueOf(STEP_DETECTION_DELTA_VAL)));
+                ctx).getString(STEP_DETECTION_DELTA, String.valueOf(STEP_DETECTION_DELTA_VAL)));
     }
 
-    public static boolean swapSensorOrientation() {
+    public static boolean swapSensorOrientation(Context ctx) {
         return PreferenceManager.getDefaultSharedPreferences(
-                DroidHandler.main).getBoolean(SWAP_SENSOR_ORIENTATION, SWAP_SENSOR_ORIENTATION_VAL);
+                ctx).getBoolean(SWAP_SENSOR_ORIENTATION, SWAP_SENSOR_ORIENTATION_VAL);
     }
 }
