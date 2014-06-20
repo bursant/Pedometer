@@ -1,17 +1,13 @@
 package pedometer.droid;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.format.Time;
 import android.view.*;
 import android.widget.Button;
@@ -25,16 +21,14 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 import pedometer.app.R;
+import pedometer.droid.algorithm.common.DetectorManager;
 import pedometer.droid.algorithm.common.MotionVector;
 import pedometer.droid.algorithm.fall.FallDetector;
-import pedometer.droid.algorithm.step.ExponentialMovingAverage;
 import pedometer.droid.algorithm.step.StepDetector;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 
 public class DroidMain extends RoboActivity implements SensorEventListener {
-
-    public static final int PLEASE_WAIT_DIALOG = 1;
 
     @InjectView(R.id.start)
     private Button startButton;
@@ -54,6 +48,8 @@ public class DroidMain extends RoboActivity implements SensorEventListener {
     @InjectView(R.id.chart)
     private LinearLayout chartLayout;
 
+    private long startTimeStamp;
+
     private GraphicalView mChart;
 
     private final XYMultipleSeriesDataset mDataSet = new XYMultipleSeriesDataset();
@@ -68,7 +64,6 @@ public class DroidMain extends RoboActivity implements SensorEventListener {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, "Received", Toast.LENGTH_SHORT).show();
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 int steps = bundle.getInt(DroidService.STEPS);
@@ -80,54 +75,120 @@ public class DroidMain extends RoboActivity implements SensorEventListener {
         }
     };
 
+    private View.OnClickListener startButtonListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            if (droidBinder != null && droidBinder.getService().isStarted()) {
+                stopService();
+                DroidMain.this.startButton.setText("Start");
+                Toast.makeText(DroidMain.this, "Stopped", Toast.LENGTH_SHORT).show();
+            } else {
+                startService();
+                DroidMain.this.startButton.setText("Stop");
+                Toast.makeText(DroidMain.this, "Started", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    private View.OnClickListener clearButtonListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            if (droidBinder != null) {
+                DetectorManager detectorManager = droidBinder.getService().getDetectorManager();
+                detectorManager.resetCounters();
+                DroidMain.this.stepDetectorTextView.setText("0 steps.");
+                DroidMain.this.stepDetectorTextView.setText("0 falls.");
+            }
+        }
+    };
+
+    private View.OnClickListener shareButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Time now = new Time();
+            now.setToNow();
+
+            String[] loinc = new String[2];
+            loinc[0] = "55423-8";
+            loinc[1] = "54854-5";
+
+            String[] values = new String[2];
+            if (droidBinder != null) {
+                DetectorManager detectorManager = droidBinder.getService().getDetectorManager();
+                StepDetector stepDetector = droidBinder.getService().getStepDetector();
+                FallDetector fallDetector = droidBinder.getService().getFallDetector();
+                values[0] = String.valueOf(detectorManager.getCountForDetector(stepDetector));
+                values[1] = String.valueOf(detectorManager.getCountForDetector(fallDetector));
+            }
+
+            Bundle bundle = new Bundle();
+            bundle.putString("Action", "meddev.MEASUREMENT");
+            bundle.putString("Data", "device://Pedometer");
+            bundle.putString("Name", "Pedometer");
+            bundle.putString("Date", now.toString());
+            bundle.putString("Action", "meddev.MEASUREMENT");
+            bundle.putStringArray("LOINC_LIST", loinc);
+            bundle.putStringArray("LOINC_VALUES", values);
+
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction("meddev.MEASUREMENT");
+            broadcastIntent.setData(Uri.parse("device://Pedometer"));
+            broadcastIntent.putExtras(bundle);
+            sendBroadcast(broadcastIntent);
+
+            Toast.makeText(getApplicationContext(), "Shared: " + values[0] + " steps , " + values[1] + " falls.", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private DroidService.DroidBinder droidBinder;
+
+    private final ServiceConnection droidServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            droidBinder = (DroidService.DroidBinder) iBinder;
+
+            if (droidBinder.getService().isStarted()) {
+                startMeasuring();
+                startButton.setText("Stop");
+            }
+
+            Toast.makeText(getApplicationContext(), "Service connected.", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            droidBinder = null;
+
+            stopMeasuring();
+
+            Toast.makeText(getApplicationContext(), "Service disconnected.", Toast.LENGTH_SHORT).show();
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DroidHandler.main = this;
         setContentView(R.layout.main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Time now = new Time();
-                now.setToNow();
+        Intent i = new Intent(this, DroidService.class);
+        if (bindService(i, droidServiceConnection, 0)) {
+            Toast.makeText(getApplicationContext(), "Pedometer bound.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Cannot bound to Pedometer.", Toast.LENGTH_SHORT).show();
+        }
 
-                String[] loinc = new String[2];
-                loinc[0] = "55423-8";
-                loinc[1] = "54854-5";
+        startButton.setOnClickListener(startButtonListener);
+        clearButton.setOnClickListener(clearButtonListener);
+        shareButton.setOnClickListener(shareButtonListener);
+    }
 
-                String[] values = new String[2];
-                values[0] = String.valueOf(DroidHandler.detectorManager.getCountForDetector(DroidHandler.stepDetector));
-                values[1] = String.valueOf(DroidHandler.detectorManager.getCountForDetector(DroidHandler.fallDetector));
-
-                Bundle bundle = new Bundle();
-                bundle.putString("Action", "meddev.MEASUREMENT");
-                bundle.putString("Data", "device://Pedometer");
-                bundle.putString("Name", "Pedometer");
-                bundle.putString("Date", now.toString());
-                bundle.putString("Action", "meddev.MEASUREMENT");
-                bundle.putStringArray("LOINC_LIST", loinc);
-                bundle.putStringArray("LOINC_VALUES", values);
-
-                Intent broadcastIntent = new Intent();
-                broadcastIntent.setAction("meddev.MEASUREMENT");
-                broadcastIntent.setData(Uri.parse("device://Pedometer"));
-                broadcastIntent.putExtras(bundle);
-                sendBroadcast(broadcastIntent);
-
-                Toast.makeText(getApplicationContext(), "Shared: " + values[0] + " steps , " + values[1] + " falls.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        if (DroidHandler.avg == null)
-            DroidHandler.avg = new ExponentialMovingAverage(DroidPreference.getAlpha(getApplicationContext()));
-
-        if (DroidHandler.fallDetector == null)
-            DroidHandler.fallDetector = new FallDetector();
-        if (DroidHandler.stepDetector == null)
-            DroidHandler.stepDetector = new StepDetector(DroidHandler.avg, DroidPreference.getStepDetectionDelta(getApplicationContext()));
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         if (mCurrentSeries == null) {
             mCurrentSeries = new XYSeries("Vector");
@@ -148,55 +209,21 @@ public class DroidMain extends RoboActivity implements SensorEventListener {
             chartLayout.addView(mChart);
         }
 
-        if (DroidHandler.started) {
-            start();
-            startButton.setText("Stop");
-        }
-
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!DroidHandler.started) {
-                    start();
-                    DroidHandler.startTimeStamp = System.currentTimeMillis();
-                    DroidHandler.started = true;
-                    DroidMain.this.startButton.setText("Stop");
-                    Toast.makeText(DroidMain.this, "Started measuring", Toast.LENGTH_SHORT).show();
-                } else {
-                    stop();
-                    DroidHandler.started = false;
-                    DroidMain.this.startButton.setText("Start");
-                    Toast.makeText(DroidMain.this, "Stopped measuring", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DroidHandler.detectorManager.resetCounters();
-                DroidMain.this.stepDetectorTextView.setText("0 steps.");
-                DroidMain.this.stepDetectorTextView.setText("0 falls.");
-            }
-        });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         registerReceiver(receiver, new IntentFilter(DroidService.NOTIFICATION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
         unregisterReceiver(receiver);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        stop();
+    public void onDestroy() {
+        super.onDestroy();
+
+        unbindService(droidServiceConnection);
     }
 
     @Override
@@ -220,36 +247,26 @@ public class DroidMain extends RoboActivity implements SensorEventListener {
         }
     }
 
-    private void start() {
+    private void startMeasuring() {
+        startTimeStamp = System.currentTimeMillis();
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
 
+    private void stopMeasuring() {
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorManager.unregisterListener(this);
+    }
+
+    private void startService() {
         Intent pedoService = new Intent(this, DroidService.class);
         startService(pedoService);
     }
 
-    private void stop() {
-        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorManager.unregisterListener(this);
-
+    private void stopService() {
         Intent pedoService = new Intent(this, DroidService.class);
         stopService(pedoService);
-    }
-
-    @Override
-    public Dialog onCreateDialog(int dialogId) {
-        switch (dialogId) {
-            case PLEASE_WAIT_DIALOG:
-                ProgressDialog dialog = new ProgressDialog(this);
-                dialog.setTitle("Processing your request");
-                dialog.setMessage("Please wait....");
-                dialog.setCancelable(true);
-                return dialog;
-
-            default:
-                return super.onCreateDialog(dialogId);
-        }
     }
 
     @Override
@@ -258,14 +275,14 @@ public class DroidMain extends RoboActivity implements SensorEventListener {
 
         long timeStamp = System.currentTimeMillis();
 
-        mRenderer.setXAxisMin((timeStamp - DroidHandler.startTimeStamp) / 1000.0 - 10.0);
-        mRenderer.setXAxisMax((timeStamp - DroidHandler.startTimeStamp) / 1000.0);
+        mRenderer.setXAxisMin((timeStamp - startTimeStamp) / 1000.0 - 10.0);
+        mRenderer.setXAxisMax((timeStamp - startTimeStamp) / 1000.0);
 
         if (mCurrentRenderer != null)
-            mCurrentSeries.add((timeStamp - DroidHandler.startTimeStamp) / 1000.0, vector);
+            mCurrentSeries.add((timeStamp - startTimeStamp) / 1000.0, vector);
+
         if (mChart != null)
             mChart.repaint();
-
     }
 
     @Override

@@ -4,10 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by bursant on 17.05.14.
@@ -19,6 +16,10 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
     private List<IDetectorListener> listeners;
     private Map<IDetector, Boolean> results;
     private Map<IDetector, Integer> counts;
+
+    public DetectorManager() {
+        this(new LinkedList<IDetector>(), new LinkedList<IDetectorListener>());
+    }
 
     public DetectorManager(List<IDetector> detectors, List<IDetectorListener> listeners) {
         this.detectors = detectors;
@@ -42,12 +43,14 @@ public class DetectorManager implements SensorEventListener, IDetectorManager {
             results.put(detector, result);
             if (result) {
                 Integer value;
+
                 synchronized (detector) {
                     value = counts.get(detector);
                     if (value != null)
                         value += 1;
                     counts.put(detector, value);
                 }
+
                 for (IDetectorListener listener : listeners) {
                     listener.notifyCountChange(detector, value);
                 }

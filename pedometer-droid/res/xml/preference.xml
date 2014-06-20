@@ -21,7 +21,7 @@
         <EditTextPreference
                 android:key="delta"
                 android:title="Delta"
-                android:summary="Step duration"
+                android:summary="Step duration in milliseconds"
                 android:defaultValue="700"
                 android:inputType="numberDecimal"/>
     </PreferenceCategory>

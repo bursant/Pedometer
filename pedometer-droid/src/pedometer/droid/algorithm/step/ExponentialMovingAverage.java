@@ -5,7 +5,9 @@ package pedometer.droid.algorithm.step;
  * Calculates and returns exponential moving average.
  */
 public class ExponentialMovingAverage {
+
     private double alpha;
+
     private Double oldValue;
 
     public ExponentialMovingAverage(double alpha) {
