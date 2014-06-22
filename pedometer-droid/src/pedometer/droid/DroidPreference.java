@@ -27,8 +27,8 @@ public class DroidPreference extends PreferenceActivity {
     }
 
     public static boolean isAutoStart(Context ctx) {
-        return Boolean.parseBoolean(PreferenceManager.getDefaultSharedPreferences(
-                ctx).getString(AUTO_START, String.valueOf(AUTO_START_VAL)));
+        return PreferenceManager.getDefaultSharedPreferences(
+                ctx).getBoolean(AUTO_START, AUTO_START_VAL);
     }
 
     public static float getAlpha(Context ctx) {
