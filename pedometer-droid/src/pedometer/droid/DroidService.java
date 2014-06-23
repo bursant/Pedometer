@@ -1,5 +1,7 @@
 package pedometer.droid;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -8,6 +10,7 @@ import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.widget.Toast;
+import pedometer.app.R;
 import pedometer.droid.algorithm.common.DetectorManager;
 import pedometer.droid.algorithm.common.IDetector;
 import pedometer.droid.algorithm.common.IDetectorListener;
@@ -80,6 +83,17 @@ public class DroidService extends RoboService implements IDetectorListener, Sens
 
         detectorManager.registerListener(this);
 
+        Notification note = new Notification(R.drawable.icon, "Pedometer", System.currentTimeMillis());
+        Intent intent = new Intent(this, DroidService.class);
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        note.setLatestEventInfo(this, "Pedometer", "Working state...", pendingIntent);
+
+        note.flags |= Notification.FLAG_NO_CLEAR;
+
+        startForeground(1337, note);
+
         Toast.makeText(this, "Started pedometer", Toast.LENGTH_SHORT).show();
     }
 
@@ -104,6 +118,8 @@ public class DroidService extends RoboService implements IDetectorListener, Sens
 
         sensorManager.unregisterListener(detectorManager);
         sensorManager.unregisterListener(this);
+
+        stopForeground(true);
 
         Toast.makeText(this, "Stopped pedometer", Toast.LENGTH_SHORT).show();
     }
