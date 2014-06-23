@@ -2,6 +2,7 @@ package pedometer.droid;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -9,6 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.widget.Toast;
 import pedometer.app.R;
 import pedometer.droid.algorithm.common.DetectorManager;
@@ -38,6 +40,8 @@ public class DroidService extends RoboService implements IDetectorListener, Sens
 
     private final IBinder droidBinder = new DroidBinder();
 
+    private PowerManager.WakeLock wakeLock;
+
     public boolean isStarted() {
         return started;
     }
@@ -64,6 +68,10 @@ public class DroidService extends RoboService implements IDetectorListener, Sens
     @Override
     public void onCreate() {
         super.onCreate();
+
+        PowerManager mgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = mgr.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "pedoLock");
+        wakeLock.acquire();
 
         started = true;
 
@@ -106,6 +114,8 @@ public class DroidService extends RoboService implements IDetectorListener, Sens
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        wakeLock.release();
 
         started = false;
 
